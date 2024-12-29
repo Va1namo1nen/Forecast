@@ -15,7 +15,7 @@ def fetch_data(url, params=None):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка: {e}")
+        print(f"\nОшибка: {e}")
         return None
 
 def ip_location():
@@ -35,7 +35,7 @@ def get_weather(location):
     data = fetch_data(BASE_URL, params)
     if data and data.get('cod') == 200:
         return data
-    print(f"Ошибка: {data.get('message', 'Неизвестная ошибка')}" if data else "Ошибка запроса")
+    print(f"\nОшибка: {data.get('message', 'Неизвестная ошибка')}" if data else "\nОшибка запроса")
     return None
 
 def format_time(shift):

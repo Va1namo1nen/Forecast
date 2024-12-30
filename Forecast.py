@@ -72,6 +72,8 @@ def display_weather(data):
         'request_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         **info
     })
+    if len(history) > 4:
+        history.pop(0)
 
 def show_history():
     if not history:

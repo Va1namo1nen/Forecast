@@ -23,7 +23,7 @@ pip install -r requirements.txt
 python -m Forecast
 ```
 
-### **ИЛИ**
+### ИЛИ
 
 Просто скачай и запусти `Forecast.exe`!
 

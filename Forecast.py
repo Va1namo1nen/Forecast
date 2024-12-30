@@ -1,4 +1,4 @@
-import os
+import socket
 import requests
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
@@ -6,8 +6,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-API_KEY = os.getenv("API_KEY")
+API_KEY = '0a942afb64ac6957c02b3173ac50c2b9'
 history = []
+
+def check_internet():
+    try:
+        socket.create_connection(("8.8.8.8", 53), timeout=5)
+        return True
+    except OSError:
+        return False
 
 def fetch_data(url, params=None):
     try:
@@ -143,4 +150,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    while True:
+        if check_internet():
+            main()
+        else:
+            input('Проверьте соединение с интернетом. Нажмите Enter, чтобы попробовать снова.')

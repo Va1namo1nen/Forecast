@@ -1,3 +1,4 @@
+import os
 import socket
 import requests
 from datetime import datetime, timedelta, timezone
@@ -6,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-API_KEY = '0a942afb64ac6957c02b3173ac50c2b9'
+API_KEY = os.getenv("API_KEY")
 history = []
 
 def check_internet():

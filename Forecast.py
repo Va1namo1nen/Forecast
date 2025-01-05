@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-API_KEY = os.getenv("API_KEY")
+API_KEY = "3a245bb4ebea7803bde3cb4a6409d222"
 history = []
 
 def check_internet():

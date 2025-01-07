@@ -1,3 +1,4 @@
+import os
 import socket
 import requests
 from datetime import datetime, timedelta, timezone
@@ -6,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-API_KEY = '3a245bb4ebea7803bde3cb4a6409d222'
+API_KEY = os.getenv("API_KEY")
 history = []
 
 def check_internet():
@@ -46,7 +47,7 @@ def get_weather(location):
     return None
 
 def format_time(shift):
-    return datetime.now(tz=timezone(timedelta(seconds=shift))).strftime("%Y-%m-%d %H:%M:%S %Z")
+    return datetime.now(tz=timezone(timedelta(seconds=shift))).strftime("%Y-%m-%d %H:%M:%S")
 
 def display_weather(data):
     info = {
@@ -68,7 +69,7 @@ def display_weather(data):
 """
     )
     history.append({
-        'request_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        'request_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         **info
     })
     if len(history) > 4:
@@ -78,14 +79,8 @@ def show_history():
     if not history:
         print("История пуста.")
     else:
-        try:
-            count = int(input("Сколько последних записей показать? (0 для всех): "))
-        except ValueError:
-            count = len(history)
-        if count == 0 or count > len(history):
-            count = len(history)
-        print("\n=== Последние запросы ===")
-        for i, entry in enumerate(reversed(history[:count]), 1):
+        print("\n=== Последние 5 запросов ===")
+        for i, entry in enumerate(history[-5:], 1):
             print(
                 f"""
             {i}. Время запроса: {entry['request_time']}

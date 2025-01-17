@@ -11,6 +11,10 @@ API_KEY = '3a245bb4ebea7803bde3cb4a6409d222'
 history = []
 
 def check_internet():
+    """
+    Функция проверяет наличие соединения с интернетом у пользователя
+    """
+    
     try:
         socket.create_connection(("8.8.8.8", 53), timeout=5)
         return True
@@ -18,6 +22,10 @@ def check_internet():
         return False
 
 def fetch_data(url, params=None):
+    """
+    Функция для фетчинга данных из использкемых апи
+    """
+    
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
@@ -27,13 +35,29 @@ def fetch_data(url, params=None):
         return None
 
 def ip_location():
+    """
+    Функция для установления местонахождения пользователя по апи
+    """
+    
     data = fetch_data("http://ipinfo.io/json")
     return data.get("city") if data else None
 
 def get_location():
+    """
+    Прием данных от пользователя
+    """
+    
     return input("Введите название города: ")
 
 def get_weather(location):
+    """
+    Прием данных от OpenweatherAPI
+
+    location - локация, определяемая либо get_location, либо ip_location
+    params - параметры URL запроса
+    data - данные, получаемые в формате JSON при помощи fetch_data
+    """
+    
     params = {
         'q': location,
         'appid': API_KEY,
@@ -48,9 +72,17 @@ def get_weather(location):
     return None
 
 def format_time(shift):
+    """
+    Функция для форматирования таймкода
+    """
+    
     return datetime.now(tz=timezone(timedelta(seconds=shift))).strftime("%Y-%m-%d %H:%M:%S %Z")
 
 def display_weather(data):
+    """
+    Функция, обрабатывающая и выводящая информацию о погоде, а также сохраняющаяя ее в истории запросов
+    """
+    
     info = {
         'time': format_time(data['timezone']),
         'city': data['name'],
@@ -73,6 +105,12 @@ def display_weather(data):
     })
 
 def show_history():
+    """
+    Функция для отображения последних n запросов
+    
+    count - количество отображаемых запросов
+    """
+    
     if not history:
         print("История пуста.")
         return
@@ -97,6 +135,10 @@ def show_history():
 """)
 
 def weather_menu():
+    """
+    Подменю погоды
+    """
+    
     while True:
         print("\n=== Погода ===")
         print("1. Текущее местоположение")
@@ -135,6 +177,10 @@ def weather_menu():
             print("Некорректный ввод. Попробуйте снова.")
 
 def main_menu():
+    """
+    Главное пользовательское меню
+    """
+    
     while True:
         print("\n=== Меню ===")
         print("1. Погода")

@@ -22,7 +22,7 @@ def fetch_data(url, params=None):
         response = requests.get(url, params=params)
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.RequestException as e:
+    except requests.RequestException as e:
         print(f"\nОшибка: {e}")
         return None
 
@@ -43,7 +43,8 @@ def get_weather(location):
     data = fetch_data(BASE_URL, params)
     if data and data.get('cod') == 200:
         return data
-    print(f"\nОшибка: {data.get('message', 'Неизвестная ошибка')}" if data else "\nОшибка запроса")
+    error_message = data.get('message', 'Неизвестная ошибка') if data else "Ошибка запроса"
+    print(f"\nОшибка: {error_message}")
     return None
 
 def format_time(shift):
@@ -58,34 +59,34 @@ def display_weather(data):
         'feels_like': data['main']['feels_like'],
         'wind_speed': data['wind']['speed']
     }
-    print(
-        f"""
+    print(f"""
 Текущее время: {info['time']}
 Название города: {info['city']}
 Погодные условия: {info['weather']}
 Текущая температура: {info['temp']} градусов по цельсию
 Ощущается как {info['feels_like']} градусов по цельсию
 Скорость ветра: {info['wind_speed']} м/c
-"""
-    )
+""")
     history.append({
         'request_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z"),
         **info
     })
+
 def show_history():
     if not history:
         print("История пуста.")
-    else:
-        try:
-            count = int(input("Сколько последних записей показать? (0 для всех): "))
-        except ValueError:
-            count = len(history)
-        if count == 0 or count > len(history):
-            count = len(history)
-        print("\n=== Последние запросы ===")
-        for i, entry in enumerate(reversed(history[:count]), 1):
-            print(
-                f"""
+        return
+
+    try:
+        count = int(input("Сколько последних записей показать? (0 для всех): "))
+    except ValueError:
+        count = len(history)
+
+    count = min(count if count > 0 else len(history), len(history))
+
+    print("\n=== Последние запросы ===")
+    for i, entry in enumerate(reversed(history[:count]), 1):
+        print(f"""
 {i}. Время запроса: {entry['request_time']}
 Текущее время: {entry['time']}
 Название города: {entry['city']}
@@ -93,10 +94,47 @@ def show_history():
 Текущая температура: {entry['temp']} градусов по цельсию
 Ощущается как {entry['feels_like']} градусов по цельсию
 Скорость ветра: {entry['wind_speed']} м/c
-"""
-            )
+""")
 
-def main():
+def weather_menu():
+    while True:
+        print("\n=== Погода ===")
+        print("1. Текущее местоположение")
+        print("2. Указать город")
+        print("0. Назад")
+        choice = input("Выберите опцию: ")
+
+        if choice == '1':
+            location = ip_location()
+            if location:
+                data = get_weather(location)
+                if data:
+                    display_weather(data)
+                else:
+                    print("Не удалось получить данные о текущем местоположении.")
+            else:
+                print("Не удалось определить текущее местоположение.")
+
+        elif choice == '2':
+            while True:
+                print("\n0. Назад")
+                location = get_location()
+                if location == "0":
+                    break
+                data = get_weather(location)
+                if data:
+                    display_weather(data)
+                    break
+                else:
+                    print("\nГород не найден. Попробуйте снова.")
+
+        elif choice == '0':
+            break
+
+        else:
+            print("Некорректный ввод. Попробуйте снова.")
+
+def main_menu():
     while True:
         print("\n=== Меню ===")
         print("1. Погода")
@@ -105,47 +143,12 @@ def main():
         choice = input("Выберите опцию: ")
 
         if choice == '1':
-            while True:
-                print("\n=== Погода ===")
-                print("1. Текущее местоположение")
-                print("2. Указать город")
-                print("0. Назад")
-                choice_1 = input("Выберите опцию: ")
-
-                if choice_1 == '1':
-                    location = ip_location()
-                    data = get_weather(location)
-                    if data:
-                        display_weather(data)
-                    else:
-                        print("Не удалось получить данные о текущем местоположении.")
-                    input("Нажмите Enter, чтобы вернуться назад.")
-                    continue
-
-                elif choice_1 == '2':
-                    while True:
-                        print("\n0. Назад")
-                        location = get_location()
-                        if location == "0":
-                            break
-                        data = get_weather(location)
-                        if data:
-                            display_weather(data)
-                            break
-                        else:
-                            print("\nГород не найден. Попробуйте снова.")
-
-                elif choice_1 == '0':
-                    break
-
-                else:
-                    print("Некорректный ввод. Попробуйте снова.")
+            weather_menu()
 
         elif choice == '2':
             print("\n=== История запросов ===")
             show_history()
             input("Нажмите Enter, чтобы вернуться назад.")
-            continue
 
         elif choice == '0':
             print("Выход из программы.")
@@ -157,8 +160,8 @@ def main():
 if __name__ == '__main__':
     while True:
         if check_internet():
-            main()
+            main_menu()
             break
         else:
-            if input('Проверьте соединение с интернетом. Нажмите Enter, чтобы попробовать снова. Нажмите 0, чтобы выйти.') == '0':
+            if input('Проверьте соединение с интернетом. Нажмите Enter, чтобы попробовать снова. Нажмите 0, чтобы выйти: ') == '0':
                 break
